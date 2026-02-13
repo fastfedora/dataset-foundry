@@ -21,7 +21,7 @@ def resolve_value(
     if hasattr(object, 'id'):
         variables['id'] = object.id
 
-    if value:
+    if value is not None:
         if callable(value):
             arg_count = value.__code__.co_argcount
             resolved_value = value(object) if arg_count == 1 else value(object, context)
