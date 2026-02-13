@@ -8,7 +8,7 @@ from dataset_foundry.actions.item.save_item import save_item
 from dataset_foundry.core.key import Key
 from dataset_foundry.core.template import Template
 from dataset_foundry.core.item_pipeline import ItemPipeline
-from dataset_foundry.utils.item import omit
+from dataset_foundry.utils.collections.omit import omit
 
 pipeline = ItemPipeline(
     name="generate_repo_from_spec_with_swe_agent",
