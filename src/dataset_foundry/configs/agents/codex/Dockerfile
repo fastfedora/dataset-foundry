@@ -6,7 +6,12 @@ RUN apt-get update && \
     apt-get install -y curl git build-essential software-properties-common && \
     rm -rf /var/lib/apt/lists/*
 
-RUN brew install codex
+# brew expects to run as a non-root user
+USER linuxbrew
+
+ENV HOMEBREW_NO_AUTO_UPDATE=1
+
+RUN brew install --cask codex
 
 WORKDIR /workspace
 
