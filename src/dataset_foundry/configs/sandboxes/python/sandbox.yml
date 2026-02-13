@@ -2,7 +2,8 @@ name: python-sandbox
 container:
   image: python-sandbox:latest
   build:
-    context: .
-    dockerfile: Dockerfile
+    # Use `configs` as the Docker build context so we can COPY files like `shared/setup-repo.sh`
+    context: ../..
+    dockerfile: sandboxes/python/Dockerfile
   working_dir: /workspace
   command: ["python"]

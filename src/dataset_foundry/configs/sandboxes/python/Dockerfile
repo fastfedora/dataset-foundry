@@ -4,6 +4,9 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED="1"
 ENV PYTHONDONTWRITEBYTECODE="1"
 
+# Allow Python packages to be installed without a virtual environment
+ENV PIP_BREAK_SYSTEM_PACKAGES="1"
+
 # Prevent pip from checking for new versions & cluttering up stderr with warnings
 ENV PIP_DISABLE_PIP_VERSION_CHECK="1"
 
@@ -28,8 +31,11 @@ RUN pip install --no-cache-dir \
 # Create a non-root user for security
 RUN useradd --create-home --shell /bin/bash guest
 
-# Copy the init script
-COPY init.sh /usr/local/bin/init.sh
+# Copy the setup-repo and init scripts. The Docker build context is `configs` (see `sandbox.yml`),
+# so these paths are relative to `src/dataset_foundry/configs`.
+COPY shared/setup-repo.sh /usr/local/bin/setup-repo.sh
+RUN chmod +x /usr/local/bin/setup-repo.sh
+COPY sandboxes/python/init.sh /usr/local/bin/init.sh
 RUN chmod +x /usr/local/bin/init.sh
 
 # Change ownership of workspace directory to guest user

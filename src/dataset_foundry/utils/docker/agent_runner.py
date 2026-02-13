@@ -31,6 +31,7 @@ class AgentInputs(BaseModel):
     item_id: str
     context_data: Dict[str, Any]
     repo_path: Optional[str] = None
+    skip_repo_setup: bool = False
 
 
 class AgentResult(BaseModel):
@@ -154,11 +155,15 @@ class AgentRunner(BaseRunner):
                 read_only=True
             ),
         ])
-        self._prepare_environment_config(config, {
+        environment = {
             "ITEM_ID": inputs.item_id,
             "OUTPUT_DIR": f"{working_dir}/output",
+            "REPO_DIR": f"{working_dir}/repo",
             "CONTEXT_DATA": json.dumps(inputs.context_data),
-        })
+        }
+        if inputs.skip_repo_setup:
+            environment["SKIP_REPO_SETUP"] = "1"
+        self._prepare_environment_config(config, environment)
 
         return config
 

@@ -7,6 +7,9 @@ ENV TZ="$TZ"
 ENV PYTHONUNBUFFERED="1"
 ENV PYTHONDONTWRITEBYTECODE="1"
 
+# Allow Python packages to be installed without a virtual environment
+ENV PIP_BREAK_SYSTEM_PACKAGES="1"
+
 # Install basic development tools and iptables/ipset
 RUN set -eu; \
   apt-get update; \
@@ -72,10 +75,15 @@ ENV PATH=$PATH:/usr/local/share/npm-global/bin
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code
 
-# Copy firewall scripts and config file
-COPY firewall/* /usr/local/bin/firewall/
+# Copy firewall scripts and config file. The Docker build context is `configs` (see `sandbox.yml`),
+# so these paths are relative to `src/dataset_foundry/configs`.
+COPY agents/claude_code/firewall/* /usr/local/bin/firewall/
 
 USER root
+
+# Copy the shared setup-repo script
+COPY shared/setup-repo.sh /usr/local/bin/setup-repo.sh
+RUN chmod +x /usr/local/bin/setup-repo.sh
 
 RUN chmod +x /usr/local/bin/firewall/init.sh && \
   chmod +x /usr/local/bin/firewall/allow-domains.sh && \
@@ -84,5 +92,5 @@ RUN chmod +x /usr/local/bin/firewall/init.sh && \
 
 USER node
 
-# Initialize firewall and then execute the command passed to the container
-ENTRYPOINT ["sh", "-c", "sudo /usr/local/bin/firewall/init.sh && exec \"$@\"", "--"]
+# Initialize firewall, run repo setup and then execute the command passed to the container
+ENTRYPOINT ["sh", "-c", "sudo /usr/local/bin/firewall/init.sh && /usr/local/bin/setup-repo.sh \"$REPO_DIR\" && exec \"$@\"", "--"]

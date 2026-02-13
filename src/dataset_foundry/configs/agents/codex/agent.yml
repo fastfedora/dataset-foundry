@@ -1,5 +1,9 @@
 container:
   image: "codex-agent:latest"
+  build:
+    # Use `configs` as the Docker build context so we can COPY files like `shared/setup-repo.sh`
+    context: ../..
+    dockerfile: agents/codex/Dockerfile
   environment:
     OPENAI_API_KEY: "${OPENAI_API_KEY}"
     # Set in `agent_runner` to be model string from `CODEX_MODEL` or `DF_MODEL`

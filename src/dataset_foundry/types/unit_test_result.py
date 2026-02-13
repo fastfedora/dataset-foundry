@@ -1,17 +1,13 @@
 import logging
-from pydantic import BaseModel
-from typing import Any, List
+
+from .command_result import CommandResult
 
 logger = logging.getLogger(__name__)
 
 
-class UnitTestResult(BaseModel):
-    command: List[Any]
+class UnitTestResult(CommandResult):
     num_passed: int
     num_failed: int
-    returncode: int
-    stdout: str
-    stderr: str
 
     @property
     def total_tests(self) -> int:

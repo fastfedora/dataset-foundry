@@ -24,6 +24,7 @@ def run_swe_agent(
         max_retries: Union[Callable, Key, int] = 3,
         output_key: Union[Callable, Key, str] = "agent_result",
         stream_logs: Union[Callable, Key, bool] = False,
+        skip_repo_setup: Union[Callable, Key, bool] = False,
     ) -> ItemAction:
     """
     Run a software engineering agent in a Docker container.
@@ -39,6 +40,8 @@ def run_swe_agent(
         max_retries: Maximum number of retry attempts
         output_key: Key to store the agent result in item data
         stream_logs: Whether to stream container logs to logger.info (default: False)
+        skip_repo_setup: If True, skips the setting up the repo in the sandbox. Use when you want
+            the agent to access the repo sample before any setup is performed (default: False)
     """
 
     async def run_swe_agent_action(item: DatasetItem, context: Context):
@@ -52,6 +55,7 @@ def run_swe_agent(
         resolved_max_retries = resolve_item_value(max_retries, item, context)
         resolved_output_key = resolve_item_value(output_key, item, context)
         resolved_stream_logs = resolve_item_value(stream_logs, item, context)
+        resolved_skip_repo_setup = resolve_item_value(skip_repo_setup, item, context)
 
         if isinstance(resolved_output_dir, str):
             resolved_output_dir = format_template(resolved_output_dir, {
@@ -70,7 +74,8 @@ def run_swe_agent(
 
         agent_inputs = await _prepare_agent_inputs(
             item, context, resolved_instructions, resolved_prompt,
-            resolved_spec, output_path, resolved_repo_path
+            resolved_spec, output_path, resolved_repo_path,
+            skip_repo_setup=resolved_skip_repo_setup
         )
         agent_runner = AgentRunner(
             agent_type=resolved_agent,
@@ -114,7 +119,8 @@ async def _prepare_agent_inputs(
     prompt: str,
     spec: Union[str, dict],
     output_dir: Path,
-    repo_path: Optional[str] = None
+    repo_path: Optional[str] = None,
+    skip_repo_setup: bool = False,
 ) -> AgentInputs:
     """Prepare input files for the agent."""
 
@@ -150,5 +156,6 @@ async def _prepare_agent_inputs(
         item_id=item.id,
         context_data={
             "attempt": 0,
-        }
+        },
+        skip_repo_setup=skip_repo_setup,
     )

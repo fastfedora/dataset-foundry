@@ -1,6 +1,9 @@
 container:
   image: "claude-code-agent:latest"
   build:
+    # Use `configs` as the Docker build context so we can COPY files like `shared/setup-repo.sh`
+    context: ../..
+    dockerfile: agents/claude_code/Dockerfile
     args:
       TZ: "${TZ:-America/Los_Angeles}"
   cap_add:
