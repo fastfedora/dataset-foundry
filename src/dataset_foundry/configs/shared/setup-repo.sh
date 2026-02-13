@@ -1,7 +1,10 @@
 #!/bin/bash
 # Install any dependencies or run any setup scripts (which install dependencies & seed databases),
+# wrapping the output in ::setup:start:: and ::setup:end:: tags for both stdout and stderr.
 
 dir="${1:-.}"
+
+echo "::setup:start::" | tee /dev/stderr
 
 if [ -f "$dir/script/setup" ]; then
     echo "Running setup script..."
@@ -16,3 +19,8 @@ elif [ -f "$dir/pyproject.toml" ]; then
 else
     echo "Skipping setup and dependency installation. No setup details found in working directory."
 fi
+
+setup_status=$?
+
+echo "::setup:end:${setup_status}::" | tee /dev/stderr
+exit $setup_status
