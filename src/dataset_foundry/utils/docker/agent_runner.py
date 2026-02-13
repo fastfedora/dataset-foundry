@@ -157,6 +157,7 @@ class AgentRunner(BaseRunner):
         self._prepare_environment_config(config, {
             "ITEM_ID": inputs.item_id,
             "OUTPUT_DIR": f"{working_dir}/output",
+            "REPO_DIR": f"{working_dir}/repo",
             "CONTEXT_DATA": json.dumps(inputs.context_data),
         })
 
