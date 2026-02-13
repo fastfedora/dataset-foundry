@@ -7,6 +7,9 @@ ENV TZ="$TZ"
 ENV PYTHONUNBUFFERED="1"
 ENV PYTHONDONTWRITEBYTECODE="1"
 
+# Allow Python packages to be installed without a virtual environment
+ENV PIP_BREAK_SYSTEM_PACKAGES="1"
+
 # Install basic development tools and iptables/ipset
 RUN set -eu; \
   apt-get update; \

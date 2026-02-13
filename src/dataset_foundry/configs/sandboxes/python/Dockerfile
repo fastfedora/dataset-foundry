@@ -4,6 +4,9 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED="1"
 ENV PYTHONDONTWRITEBYTECODE="1"
 
+# Allow Python packages to be installed without a virtual environment
+ENV PIP_BREAK_SYSTEM_PACKAGES="1"
+
 # Prevent pip from checking for new versions & cluttering up stderr with warnings
 ENV PIP_DISABLE_PIP_VERSION_CHECK="1"
 
