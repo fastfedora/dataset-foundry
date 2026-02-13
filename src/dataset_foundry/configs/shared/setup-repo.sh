@@ -6,6 +6,12 @@ dir="${1:-.}"
 
 echo "::setup:start::" | tee /dev/stderr
 
+if [ -n "${SKIP_REPO_SETUP}" ]; then
+    echo "Skipping repo setup because SKIP_REPO_SETUP is set"
+    echo "::setup:end:0::" | tee /dev/stderr
+    exit 0
+fi
+
 if [ -f "$dir/script/setup" ]; then
     echo "Running setup script..."
     chmod u+x "$dir"/script/*
