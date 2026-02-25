@@ -105,6 +105,9 @@ class SandboxRunner(BaseRunner):
 
         working_dir = self._get_working_dir(config)
 
+        # TODO: Maybe use a volume mount that copies files into the container instead of a bind
+        #       mount so the sandbox runner isn't modifying the original sample unless we want it
+        #       to. [fastfedora 25.Feb.26]
         self._prepare_volumes_config(config, [
             Mount(target=working_dir, source=str(workspace_dir), type="bind", read_only=False)
         ])
