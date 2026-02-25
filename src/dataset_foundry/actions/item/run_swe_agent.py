@@ -138,6 +138,8 @@ async def _prepare_agent_inputs(
         spec_file.write_text(str(spec))
 
     # Copy existing repo if provided
+    # TODO: This appears to be unused. The repo is mounted as a volume in the container. Consider
+    #       removing this. [fastfedora 25.Feb.26]
     if repo_path:
         repo_source = Path(repo_path)
         if repo_source.exists():

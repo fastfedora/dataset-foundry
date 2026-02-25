@@ -135,6 +135,9 @@ class AgentRunner(BaseRunner):
         os.environ["AGENT_MODEL"] = agent_model
 
         self._prepare_volumes_config(config, [
+            # TODO: Figure out how to exclude the `runs` directory from this mount, so the agent
+            #       doesn't waste time looking in these folders (i.e., make a configurable property
+            #       of ignored directories). [fastfedora 25.Feb.26]
             Mount(target=working_dir, source=str(output_dir), type="bind", read_only=False),
             Mount(
                 target=f"{inputs_dir}/prompt.md",

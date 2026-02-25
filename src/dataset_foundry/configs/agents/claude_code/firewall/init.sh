@@ -34,31 +34,7 @@ iptables -A OUTPUT -o lo -j ACCEPT
 # Create ipset with CIDR support
 ipset create allowed-domains hash:net
 
-# Fetch GitHub meta information and aggregate + add their IP ranges
-echo "Fetching GitHub IP ranges..."
-gh_ranges=$(curl -s https://api.github.com/meta)
-if [ -z "$gh_ranges" ]; then
-    echo "ERROR: Failed to fetch GitHub IP ranges"
-    exit 1
-fi
-
-if ! echo "$gh_ranges" | jq -e '.web and .api and .git' >/dev/null; then
-    echo "ERROR: GitHub API response missing required fields"
-    echo "$gh_ranges"
-    exit 1
-fi
-
-echo "Processing GitHub IPs..."
-while read -r cidr; do
-    if [[ ! "$cidr" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$ ]]; then
-        echo "ERROR: Invalid CIDR range from GitHub meta: $cidr"
-        exit 1
-    fi
-    echo "Adding GitHub range $cidr"
-    ipset add allowed-domains "$cidr"
-done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
-
-# Resolve and add other allowed domains from external configuration
+# Resolve and add allowed domains from external configuration
 "${SCRIPT_DIR}/allow-domains.sh" "${SCRIPT_DIR}/firewall.yml"
 
 # Get host IP from default route
@@ -94,14 +70,6 @@ if curl --connect-timeout 5 https://example.com >/dev/null 2>&1; then
     exit 1
 else
     echo "Firewall verification passed - unable to reach https://example.com as expected"
-fi
-
-# Verify GitHub API access
-if ! curl --connect-timeout 5 https://api.github.com/zen >/dev/null 2>&1; then
-    echo "ERROR: Firewall verification failed - unable to reach https://api.github.com"
-    exit 1
-else
-    echo "Firewall verification passed - able to reach https://api.github.com as expected"
     echo "----------------------------------------------------------------"
     echo "SUCCESS: Firewall configured"
     echo "----------------------------------------------------------------"

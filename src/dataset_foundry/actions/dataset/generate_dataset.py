@@ -82,6 +82,7 @@ def generate_dataset(
             contents = contents[:context['num_samples']]
 
         for i, content in enumerate(contents):
+            # TODO: Make this configurable, so we can set the ID to `scenarios` for the pipeline viewer
             item = DatasetItem(
                 f"{i+1:03d}",
                 { resolved_output_key: content } if resolved_output_key else content

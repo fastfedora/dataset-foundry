@@ -14,6 +14,8 @@ def set_item_property(
         resolved_key = resolve_item_value(key, item, context, required_as="key")
         resolved_value = resolve_item_value(value, item, context)
 
+        # TODO: Think about whether we should delete the key if the value is None, and if so, how.
+        #       we might do that with history tracking. [fastfedora 5.Aug.25]
         item.push({
             resolved_key: resolved_value
         }, set_item_property);

@@ -93,4 +93,8 @@ RUN chmod +x /usr/local/bin/firewall/init.sh && \
 USER node
 
 # Initialize firewall, run repo setup and then execute the command passed to the container
-ENTRYPOINT ["sh", "-c", "sudo /usr/local/bin/firewall/init.sh && /usr/local/bin/setup-repo.sh \"$REPO_DIR\" && exec \"$@\"", "--"]
+# NOTE: Temporarily disabling firewall initialization, since some of the repo samples created for
+#       `full-repo-datasets` require internet access for testing. I'm not yet sure how to resolve
+#       that with giving Claude Code full access to the internet. [fastfedora 25.Feb.26]
+# ENTRYPOINT ["sh", "-c", "sudo /usr/local/bin/firewall/init.sh && /usr/local/bin/setup-repo.sh \"$REPO_DIR\" && exec \"$@\"", "--"]
+ENTRYPOINT ["sh", "-c", "/usr/local/bin/setup-repo.sh \"$REPO_DIR\" && exec \"$@\"", "--"]
