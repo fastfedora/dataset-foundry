@@ -3,6 +3,7 @@
 # wrapping the output in ::setup:start:: and ::setup:end:: tags for both stdout and stderr.
 
 dir="${1:-.}"
+original_dir="$(pwd)"
 
 echo "::setup:start::" | tee /dev/stderr
 
@@ -12,21 +13,31 @@ if [ -n "${SKIP_REPO_SETUP}" ]; then
     exit 0
 fi
 
-if [ -f "$dir/script/setup" ]; then
+# Run all scripts from the repo directory; if no repo directory exists yet, exit with success
+cd "$dir" 2>/dev/null || {
+    echo "Skipping repo setup because no repo detected in ${dir}"
+    echo "::setup:end:0::" | tee /dev/stderr
+    exit 0
+}
+
+
+if [ -f "script/setup" ]; then
     echo "Running setup script..."
-    chmod u+x "$dir"/script/*
-    "$dir/script/setup"
-elif [ -f "$dir/requirements.txt" ]; then
+    chmod u+x script/*
+    ./script/setup
+elif [ -f "requirements.txt" ]; then
     echo "Installing dependencies from requirements.txt..."
-    pip install -r "$dir/requirements.txt"
-elif [ -f "$dir/pyproject.toml" ]; then
+    pip install -r requirements.txt
+elif [ -f "pyproject.toml" ]; then
     echo "Installing dependencies from pyproject.toml..."
-    pip install -e "$dir"
+    pip install -e .
 else
     echo "Skipping setup and dependency installation. No setup details found in working directory."
 fi
 
 setup_status=$?
+
+cd "$original_dir" || echo "Warning: failed to restore original directory $original_dir" >&2
 
 echo "::setup:end:${setup_status}::" | tee /dev/stderr
 exit $setup_status
