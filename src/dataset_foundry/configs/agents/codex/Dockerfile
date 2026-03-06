@@ -1,10 +1,22 @@
 FROM homebrew/ubuntu22.04
 USER root
 
-# Install system dependencies
+# Install system dependencies, including Python and pip for repo setup scripts
 RUN apt-get update && \
-    apt-get install -y curl git build-essential software-properties-common && \
+    apt-get install -y \
+      curl \
+      git \
+      build-essential \
+      software-properties-common \
+      python3 \
+      python3-pip \
+      python3-venv \
+      python3-dev && \
     rm -rf /var/lib/apt/lists/*
+
+# Provide common `python` / `pip` entrypoints expected by repos
+RUN ln -sf /usr/bin/python3 /usr/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip
 
 # brew expects to run as a non-root user
 USER linuxbrew
