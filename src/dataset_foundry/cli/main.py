@@ -158,6 +158,7 @@ async def main_cli():
 
     module = import_module(args["pipeline"])
     logger.info(f"Loaded pipeline: {args['pipeline']}")
+    logger.info(f"Pipeline parameters: {pipeline_parameters}")
 
     await display.run_pipeline(module.pipeline, params={ **args, **pipeline_parameters })
 
