@@ -161,17 +161,19 @@ async def main_cli():
 
     await display.run_pipeline(module.pipeline, params={ **args, **pipeline_parameters })
 
-# Set up signal handler for graceful interruption
 def signal_handler(_signum, _frame):
     print("\nReceived interrupt signal, shutting down gracefully...")
-    # Let the asyncio event loop handle the shutdown
-    # This allows running tasks to clean up properly
+    raise KeyboardInterrupt()
 
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 def main():
-    asyncio.run(main_cli())
+    try:
+        asyncio.run(main_cli())
+    except KeyboardInterrupt:
+        # Interrupt handled; exit without traceback
+        pass
 
 if __name__ == "__main__":
-    asyncio.run(main_cli())
+    main()
