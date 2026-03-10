@@ -11,6 +11,10 @@ def while_item(condition: str, actions: list, max_iterations: int = 10) -> ItemA
     """
     Creates an action that executes a list of actions while a given condition is met.
 
+    The `iteration` variable passed into the condition represents the number of completed iterations
+    at the time the condition is evaluated. On the first evaluation, `iteration` is 0 because the
+    actions have not yet executed.
+
     Args:
         condition (str): A string representing the condition to evaluate.
         actions (list): A list of actions to execute if the condition is true.
@@ -26,10 +30,10 @@ def while_item(condition: str, actions: list, max_iterations: int = 10) -> ItemA
         # TODO: Think about whether we want to bind `**item.data` here to make things simpler. I
         #       think other item actions are doing this [fastfedora 3.Mar.2025]
         while item_eval(condition, item, context, { 'iteration': iterations }):
-            logger.debug(f"Condition '{condition}' met. Executing loop {iterations + 1}.")
+            iterations += 1
+            logger.debug(f"Condition '{condition}' met. Executing loop {iterations}.")
             for action in actions:
                 await action(item, context)
-            iterations += 1
 
             if iterations >= max_iterations:
                 logger.warning(f"Reached maximum of {max_iterations} iterations for '{condition}'.")
