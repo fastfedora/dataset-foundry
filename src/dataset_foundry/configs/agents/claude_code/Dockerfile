@@ -70,7 +70,7 @@ USER node
 
 # Install global packages
 ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
-ENV PATH=$PATH:/usr/local/share/npm-global/bin
+ENV PATH="$HOME/.local/bin:/usr/local/share/npm-global/bin:${PATH}"
 
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code

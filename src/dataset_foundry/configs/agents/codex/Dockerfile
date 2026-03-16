@@ -23,6 +23,8 @@ USER linuxbrew
 
 ENV HOMEBREW_NO_AUTO_UPDATE=1
 
+ENV PATH="$HOME/.local/bin:${PATH}"
+
 RUN brew install --cask codex
 
 WORKDIR /workspace
