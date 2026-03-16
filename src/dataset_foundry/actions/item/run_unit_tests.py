@@ -27,6 +27,7 @@ def run_unit_tests(
         property: Union[Callable,Key,str] = "test_result",
         setup_property: Union[Callable,Key,str] = "setup_result",
         sandbox: Optional[Union[Callable,Key,str]] = None,
+        test_plugins_dir: Optional[Union[Callable,Key,str,Path]] = None,
         stream_logs: Union[Callable,Key,bool] = False,
         timeout: Union[Callable,Key,int] = 300,
     ) -> ItemAction:
@@ -36,6 +37,7 @@ def run_unit_tests(
         resolved_property = resolve_item_value(property, item, context, required_as="property")
         resolved_setup_property = resolve_item_value(setup_property, item, context)
         resolved_sandbox = resolve_item_value(sandbox, item, context)
+        resolved_test_plugins_dir = resolve_item_value(test_plugins_dir, item, context)
         resolved_stream_logs = resolve_item_value(stream_logs, item, context)
         resolved_timeout = resolve_item_value(timeout, item, context)
 
@@ -45,12 +47,16 @@ def run_unit_tests(
             else:
                 raise ValueError("Sandbox must be a string name of a sandbox")
 
+            if isinstance(resolved_test_plugins_dir, str):
+                resolved_test_plugins_dir = Path(resolved_test_plugins_dir)
+
             command = [f"python -m pytest -v '{resolved_filename}'"]
 
             logger.info(f"Running tests in sandbox with command: {' '.join(command)}")
             sandbox_result = await sandbox_manager.run(
                 target_file=resolved_filename,
                 workspace_dir=resolved_dir,
+                test_plugins_dir=resolved_test_plugins_dir,
                 command=command,
                 timeout=resolved_timeout,
                 stream_logs=resolved_stream_logs

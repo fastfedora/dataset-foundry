@@ -191,3 +191,49 @@ class BaseRunner:
             config.environment.update(environment)
 
         config.environment = resolve_environment_dict(config.environment)
+
+    def _prepare_test_plugins_config(
+        self,
+        config: ContainerConfig,
+        test_plugins_dir: Optional[Path] = None
+    ) -> None:
+        """
+        Configure pytest plugins for the container.
+
+        If `test_plugins_dir` is provided, mounts it read-only at `/pytest-plugins` inside the
+        container and prepends `/pytest-plugins` to `PYTHONPATH` so that any modules in the
+        directory can be imported by Python code running in the container.
+        """
+        if not test_plugins_dir:
+            return
+
+        test_plugins_dir = test_plugins_dir.resolve()
+        if not test_plugins_dir.exists() or not test_plugins_dir.is_dir():
+            raise ValueError(
+                f"Test plugins directory {test_plugins_dir} does not exist or is not a directory"
+            )
+
+        if not config.volumes:
+            config.volumes = []
+
+        config.volumes.append(
+            Mount(target="/pytest-plugins", source=str(test_plugins_dir), type="bind", read_only=True)
+        )
+
+        if not config.environment:
+            config.environment = {}
+
+        pythonpath = config.environment.get("PYTHONPATH") or ""
+        if pythonpath:
+            pythonpath = ":" + pythonpath
+        config.environment["PYTHONPATH"] = "/pytest-plugins" + pythonpath
+
+        # Configure pytest plugins so they are loaded automatically when pytest runs in the sandbox.
+        pytest_plugins = config.environment.get("PYTEST_PLUGINS") or ""
+
+        for test_plugin_file in sorted(test_plugins_dir.glob("*.py")):
+            name = test_plugin_file.stem
+            pytest_plugins = f"{pytest_plugins},{name}" if pytest_plugins else name
+
+        if pytest_plugins:
+            config.environment["PYTEST_PLUGINS"] = pytest_plugins

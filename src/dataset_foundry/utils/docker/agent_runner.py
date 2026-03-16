@@ -69,6 +69,7 @@ class AgentRunner(BaseRunner):
         self,
         inputs: AgentInputs,
         output_dir: Path,
+        test_plugins_dir: Optional[Path] = None,
         timeout: int = 3600,
         attempt: int = 1,
         stream_logs: bool = False
@@ -92,7 +93,7 @@ class AgentRunner(BaseRunner):
 
             await self._ensure_image_built(stream_logs)
 
-            container_config = self._prepare_container_config(inputs, output_dir)
+            container_config = self._prepare_container_config(inputs, output_dir, test_plugins_dir)
 
             logger.info(f"Running agent {self.runner_name} (attempt {attempt})")
             container_result = await self.container_manager.run_container(
@@ -114,7 +115,8 @@ class AgentRunner(BaseRunner):
     def _prepare_container_config(
         self,
         inputs: AgentInputs,
-        output_dir: Path
+        output_dir: Path,
+        test_plugins_dir: Optional[Path] = None,
     ) -> ContainerConfig:
         """Prepare container configuration for agent execution."""
 
@@ -167,6 +169,7 @@ class AgentRunner(BaseRunner):
         if inputs.skip_repo_setup:
             environment["SKIP_REPO_SETUP"] = "1"
         self._prepare_environment_config(config, environment)
+        self._prepare_test_plugins_config(config, test_plugins_dir)
 
         return config
 

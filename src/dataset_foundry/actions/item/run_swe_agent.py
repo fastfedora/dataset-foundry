@@ -20,6 +20,7 @@ def run_swe_agent(
         output_dir: Union[Callable, Key, str] = Key("context.output_dir"),
         agent: Union[Callable, Key, str] = Key("context.swe_agent.type"),
         repo_path: Optional[Union[Callable, Key, str]] = None,
+        test_plugins_dir: Optional[Union[Callable, Key, str]] = None,
         timeout: Union[Callable, Key, int] = 3600,  # 1 hour default
         max_retries: Union[Callable, Key, int] = 3,
         output_key: Union[Callable, Key, str] = "agent_result",
@@ -36,6 +37,7 @@ def run_swe_agent(
         output_dir: Directory where agent output should be saved
         agent: Name of the agent to run (e.g., "codex", "claude-code")
         repo_path: Optional path to pre-existing repository
+        test_plugins_dir: Optional directory containing pytest plugins to mount in the container
         timeout: Maximum execution time in seconds
         max_retries: Maximum number of retry attempts
         output_key: Key to store the agent result in item data
@@ -51,6 +53,7 @@ def run_swe_agent(
         resolved_output_dir = resolve_item_value(output_dir, item, context, required_as="output_dir")
         resolved_agent = resolve_item_value(agent, item, context, required_as="agent")
         resolved_repo_path = resolve_item_value(repo_path, item, context) if repo_path else None
+        resolved_test_plugins_dir = resolve_item_value(test_plugins_dir, item, context)
         resolved_timeout = resolve_item_value(timeout, item, context)
         resolved_max_retries = resolve_item_value(max_retries, item, context)
         resolved_output_key = resolve_item_value(output_key, item, context)
@@ -68,6 +71,9 @@ def run_swe_agent(
                 "id": item.id,
                 **item.data
             })
+
+        if isinstance(resolved_test_plugins_dir, str):
+            resolved_test_plugins_dir = Path(resolved_test_plugins_dir)
 
         output_path = Path(resolved_output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
@@ -93,6 +99,7 @@ def run_swe_agent(
                 result = await agent_runner.run(
                     inputs=agent_inputs,
                     output_dir=output_path,
+                    test_plugins_dir=resolved_test_plugins_dir,
                     timeout=resolved_timeout,
                     attempt=attempt + 1,
                     stream_logs=resolved_stream_logs
