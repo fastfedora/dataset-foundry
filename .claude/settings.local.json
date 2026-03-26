@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git merge-base:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)"
+    ]
+  }
+}
