@@ -8,21 +8,24 @@ in the dataset.
 
 For details on which actions are supported, see the [actions](docs/actions.md) documentation.
 
-## Setup
+## Installation
 
-1. Clone the repository
-2. Create a virtual environment:
+1. Install the package:
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install dataset-foundry
    ```
-3. Install the package:
-   ```bash
-   pip install -e .
+
+2. Create a `.env` file in the project root:
    ```
-4. Create a `.env` file in the project root with your OpenAI API key:
-   ```
-   OPENAI_API_KEY=your_api_key_here
+   # Provider API keys
+   OPENAI_API_KEY=
+   ANTHROPIC_API_KEY=
+
+   # Command-line defaults
+   DF_MODEL=anthropic/claude-sonnet-4-20250514
+
+   # Keep full display open after finishing so you can browse the results
+   # DF_NO_EXIT=true
    ```
 
 ### Default Settings
