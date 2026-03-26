@@ -237,3 +237,7 @@ class BaseRunner:
 
         if pytest_plugins:
             config.environment["PYTEST_PLUGINS"] = pytest_plugins
+
+        if config.environment:
+            logger.info(f"Configured pytest plugins: {pytest_plugins}")
+            logger.info(f"Environment: {config.environment}")
