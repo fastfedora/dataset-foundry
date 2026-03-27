@@ -72,6 +72,20 @@ Executes a pipeline of steps on an item. Does not execute the setup or teardown 
 **Parameters:**
 - `pipeline` (Union[Callable,Key,ItemPipeline,str]): The pipeline defining step to execute
 
+### `do_while_item`
+Executes actions at least once and then repeatedly while a condition is true.
+
+**Parameters:**
+- `actions` (list): Actions to execute while condition is true
+- `condition` (str): The condition to evaluate
+- `max_iterations` (int): Maximum number of iterations (default: 10)
+
+For both `while_item` and `do_while_item`, the condition receives an `iteration` variable that
+represents the number of completed iterations at the time the condition is evaluated. For
+`while_item`, `iteration` is 0 on the first evaluation because the body has not yet run. For
+`do_while_item`, the body executes once before the first evaluation, so `iteration` is 1 on the
+first condition check.
+
 ### `generate_item`
 Generates a data item using a language model, storing the result as either the entire data for a
 data item, or, if specified, as data underneath the property specified by `output_key`.

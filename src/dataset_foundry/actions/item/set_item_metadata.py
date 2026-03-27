@@ -43,6 +43,7 @@ def set_item_metadata(
 
         else:
             metadata["created_at"] = run_at
+            metadata["updated_at"] = run_at
             metadata.setdefault("initial", {
                 "pipeline": get_pipeline_metadata(context),
                 "model": context.model.info,

@@ -24,7 +24,7 @@ cd "$dir" 2>/dev/null || {
 if [ -f "script/setup" ]; then
     echo "Running setup script..."
     chmod u+x script/*
-    ./script/setup
+    bash -e ./script/setup
 elif [ -f "requirements.txt" ]; then
     echo "Installing dependencies from requirements.txt..."
     pip install -r requirements.txt

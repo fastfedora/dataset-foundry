@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import List, Optional
 
 from docker.types import Mount
-from pydantic import BaseModel
 
 from .base_runner import BaseRunner, RunnerConfig
 from .container_manager import ContainerConfig, ContainerResult
@@ -40,6 +39,7 @@ class SandboxRunner(BaseRunner):
         self,
         target_file: Path,
         workspace_dir: Path,
+        test_plugins_dir: Optional[Path] = None,
         command: Optional[List[str]] = None,
         timeout: int = 300,
         stream_logs: bool = False
@@ -50,6 +50,7 @@ class SandboxRunner(BaseRunner):
         Args:
             target_file: Path to the target file to execute
             workspace_dir: Directory containing all files to mount
+            test_plugins_dir: Optional directory containing pytest plugins to mount
             command: Optional command to override the default
             timeout: Timeout for execution in seconds (default: 300)
             stream_logs: Whether to stream container logs
@@ -66,6 +67,7 @@ class SandboxRunner(BaseRunner):
             container_config = self._create_container_config(
                 workspace_dir,
                 target_file,
+                test_plugins_dir,
                 command,
             )
 
@@ -94,6 +96,7 @@ class SandboxRunner(BaseRunner):
         self,
         workspace_dir: Path,
         target_file: Path,
+        test_plugins_dir: Optional[Path] = None,
         command: Optional[List[str]] = None
     ) -> ContainerConfig:
         """Create container configuration for the sandbox."""
@@ -112,5 +115,6 @@ class SandboxRunner(BaseRunner):
             Mount(target=working_dir, source=str(workspace_dir), type="bind", read_only=False)
         ])
         self._prepare_environment_config(config)
+        self._prepare_test_plugins_config(config, test_plugins_dir)
 
         return config

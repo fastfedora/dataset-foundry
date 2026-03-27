@@ -6,26 +6,35 @@ from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
-MAX_TOKENS = 8096
+DEFAULT_MAX_TOKENS = 8096
 
 logger = logging.getLogger(__name__)
+
 
 class Model:
     _provider: str
     _model_name: str
     _model: BaseChatModel
     _temperature: float | None
+    _max_tokens: int
 
-    def __init__(self, model: str, temperature: float | None = None):
+    def __init__(
+        self,
+        model: str,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ):
         provider, model_name = Model._parse_model_string(model)
 
         self._provider = provider
         self._model_name = model_name
         self._temperature = temperature
+        self._max_tokens = max_tokens if max_tokens is not None else DEFAULT_MAX_TOKENS
 
         if provider == "openai":
             args = {
                 "model": model_name,
+                "max_tokens": self._max_tokens,
                 **({
                     "temperature": temperature,
                 } if temperature is not None and model_name not in ['o1-mini', 'o3-mini'] else {}),
@@ -35,7 +44,7 @@ class Model:
             self._model = ChatAnthropic(
                 model=model_name,
                 temperature=temperature,
-                max_tokens=MAX_TOKENS
+                max_tokens=self._max_tokens,
             )
         else:
             raise ValueError(f"Unsupported model provider: {provider}")
@@ -66,6 +75,7 @@ class Model:
             "name": self._model_name,
             "kwargs": self._model.model_kwargs,
             "temperature": self._temperature,
+            "max_tokens": self._max_tokens,
         }
 
     async def ainvoke(self, messages: List[BaseMessage], **kwargs) -> BaseMessage:

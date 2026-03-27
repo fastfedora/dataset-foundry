@@ -10,8 +10,13 @@ from ..utils.imports.import_module import import_module
 from ..utils.params.parse_dir_arg import parse_dir_arg
 from .advanced_argparse import AdvancedArgumentParser
 from .config import DATASET_DIR, LOG_DIR
-from .config import DEFAULT_MODEL, DEFAULT_MODEL_TEMPERATURE, DEFAULT_NUM_SAMPLES
-from .config import DEFAULT_MAX_CONCURRENT_ITEMS
+from .config import (
+    DEFAULT_MAX_CONCURRENT_ITEMS,
+    DEFAULT_MAX_TOKENS,
+    DEFAULT_MODEL,
+    DEFAULT_MODEL_TEMPERATURE,
+    DEFAULT_NUM_SAMPLES,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +97,13 @@ async def main_cli():
         help=f"Temperature for generation (default: {DEFAULT_MODEL_TEMPERATURE})"
     )
     parser.add_argument(
+        "--max-tokens",
+        type=int,
+        env="DF_MAX_TOKENS",
+        default=DEFAULT_MAX_TOKENS,
+        help=f"Maximum tokens for model output (default: {DEFAULT_MAX_TOKENS})"
+    )
+    parser.add_argument(
         "--display",
         type=str,
         env="DF_DISPLAY",
@@ -133,7 +145,8 @@ async def main_cli():
     args["log_dir"] = parse_dir_arg(args["log_dir"], LOG_DIR / args["dataset"], True)
     args["model"] = Model(
         model=args["model"],
-        temperature=args["temperature"]
+        temperature=args["temperature"],
+        max_tokens=args["max_tokens"],
     )
 
     pipeline_parameters = {
@@ -145,20 +158,23 @@ async def main_cli():
 
     module = import_module(args["pipeline"])
     logger.info(f"Loaded pipeline: {args['pipeline']}")
+    logger.info(f"Pipeline parameters: {pipeline_parameters}")
 
     await display.run_pipeline(module.pipeline, params={ **args, **pipeline_parameters })
 
-# Set up signal handler for graceful interruption
 def signal_handler(_signum, _frame):
     print("\nReceived interrupt signal, shutting down gracefully...")
-    # Let the asyncio event loop handle the shutdown
-    # This allows running tasks to clean up properly
+    raise KeyboardInterrupt()
 
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 def main():
-    asyncio.run(main_cli())
+    try:
+        asyncio.run(main_cli())
+    except KeyboardInterrupt:
+        # Interrupt handled; exit without traceback
+        pass
 
 if __name__ == "__main__":
-    asyncio.run(main_cli())
+    main()

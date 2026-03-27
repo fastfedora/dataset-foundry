@@ -10,6 +10,9 @@ ENV PIP_BREAK_SYSTEM_PACKAGES="1"
 # Prevent pip from checking for new versions & cluttering up stderr with warnings
 ENV PIP_DISABLE_PIP_VERSION_CHECK="1"
 
+# Ensure local bin directory is in PATH to quiet pip warning
+ENV PATH="$HOME/.local/bin:${PATH}"
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
